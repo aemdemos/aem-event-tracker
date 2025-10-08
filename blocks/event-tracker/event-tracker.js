@@ -286,6 +286,23 @@ function getPaginatedData(data, page, itemsPerPage) {
 }
 
 /**
+ * Checks if a date matches today's date
+ * @param {string} dateValue - The date value to check
+ * @returns {boolean} True if date is today
+ */
+function isToday(dateValue) {
+  if (!dateValue || !isExcelSerialDate(dateValue)) {
+    return false;
+  }
+
+  const formattedDate = formatExcelDate(dateValue);
+  const today = new Date();
+  const todayFormatted = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}/${today.getFullYear()}`;
+
+  return formattedDate === todayFormatted;
+}
+
+/**
  * Renders the table body with data
  * @param {HTMLElement} tbody - Table body element
  * @param {Array} data - Data to render
@@ -295,6 +312,15 @@ function renderTableBody(tbody, data, columns) {
   tbody.innerHTML = '';
   data.forEach((row) => {
     const tr = document.createElement('tr');
+
+    // Check if this row's Event Start Date is today
+    const eventStartDateColumn = columns.find((col) => col.toLowerCase().includes('event start date')
+      || col.toLowerCase() === 'event start date');
+
+    if (eventStartDateColumn && isToday(row[eventStartDateColumn])) {
+      tr.classList.add('today-event');
+    }
+
     columns.forEach((column) => {
       const td = document.createElement('td');
       const rawValue = row[column] || '';

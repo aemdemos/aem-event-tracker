@@ -131,6 +131,22 @@ main > .section.event-tracker-container > div {
   cursor: pointer;
 }
 
+/* Highlight rows with today's event start date */
+
+/* Using semi-transparent green as overlay to preserve alternating row colors */
+
+.event-tracker-table tbody tr.today-event {
+  background-color: rgb(198 239 206 / 35%); /* Lighter green overlay for odd rows */
+}
+
+.event-tracker-table tbody tr.today-event:nth-child(even) {
+  background-color: rgb(198 239 206 / 65%); /* Darker green overlay for even rows */
+}
+
+.event-tracker-table tbody tr.today-event:hover {
+  background-color: rgb(144 238 144 / 70%); /* Brighter green on hover */
+}
+
 .event-tracker-table tbody tr:last-child td {
   border-bottom: none;
 }
