@@ -4,18 +4,104 @@ footer {
   border-top: 1px solid #e1e1e1;
 }
 
+footer .footer {
+  padding: 20px 24px;
+}
+
 footer .footer > div {
   margin: auto;
   max-width: 1200px;
-  padding: 40px 24px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
 }
 
 footer .footer p {
   margin: 0;
 }
 
+/* Footer logo */
+footer .footer-logo {
+  flex-shrink: 0;
+}
+
+footer .footer-logo svg {
+  height: 24px;
+  width: auto;
+}
+
+/* Footer content (copyright and links) */
+footer .footer-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+/* Style all text and links in footer content */
+footer .footer-content,
+footer .footer-content p,
+footer .footer-content a {
+  color: #6e6e6e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+footer .footer-content a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+footer .footer-content a:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* Remove default paragraph margins */
+footer .footer-content p {
+  margin: 0;
+  display: inline;
+}
+
+/* Style separators between links */
+footer .footer-content p:not(:last-child)::after {
+  content: ' / ';
+  color: #6e6e6e;
+  padding: 0 4px;
+}
+
 @media (width >= 900px) {
+  footer .footer {
+    padding: 20px 40px;
+  }
+}
+
+@media (width < 768px) {
   footer .footer > div {
-    padding: 40px 32px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  footer .footer-content {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  footer .footer-copyright {
+    white-space: normal;
+  }
+  
+  footer .footer-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  footer .footer-links a {
+    white-space: normal;
   }
 }
