@@ -630,20 +630,30 @@ function createTable(data, columns = null, container = null) {
   table.dataset.displayColumns = JSON.stringify(displayColumns);
   table.dataset.allColumns = JSON.stringify(allColumns);
 
+  // Find "Event Start Date" column for default sorting
+  const eventStartDateColumn = displayColumns.find((col) =>
+    col.toLowerCase().includes('event start date') || col === 'Event Start Date');
+
+  // Apply default sorting if Event Start Date column exists
+  let sortedData = data;
+  if (eventStartDateColumn) {
+    sortedData = sortData(data, eventStartDateColumn, 'asc');
+  }
+
   // Initialize pagination state
   const paginationState = {
     currentPage: 1,
     itemsPerPage: 10,
     totalItems: data.length,
-    currentData: data,
-    sortColumn: null,
+    currentData: sortedData,
+    sortColumn: eventStartDateColumn || null,
     sortDirection: 'asc',
     allColumns,
   };
 
   // Render initial page
   const paginatedData = getPaginatedData(
-    data,
+    sortedData,
     paginationState.currentPage,
     paginationState.itemsPerPage,
   );
@@ -651,11 +661,18 @@ function createTable(data, columns = null, container = null) {
   table.appendChild(tbody);
 
   // Add click handlers for sorting (with pagination support)
+  // Pass original data to sort handlers so re-sorting works correctly
   addSortHandlers(table, thead, tbody, data, displayColumns, paginationState, container);
+
+  // Update sort indicators to show initial sort
+  if (eventStartDateColumn) {
+    const headers = thead.querySelectorAll('.sortable-header');
+    updateSortIndicators(headers, eventStartDateColumn, 'asc');
+  }
 
   // Create pagination controls if container is provided
   if (container) {
-    createPaginationControls(container, paginationState, data, displayColumns, tbody);
+    createPaginationControls(container, paginationState, sortedData, displayColumns, tbody);
   }
 
   return table;
