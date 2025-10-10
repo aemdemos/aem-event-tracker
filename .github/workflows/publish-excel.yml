@@ -2,7 +2,7 @@ name: Publish Event Data Hourly
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *" # Every 5 minutes (for testing)
+    - cron: "55 * * * *" # Every hour at 55 minutes past the hour
 
 jobs:
   publish-event-data:
