@@ -631,8 +631,7 @@ function createTable(data, columns = null, container = null) {
   table.dataset.allColumns = JSON.stringify(allColumns);
 
   // Find "Event Start Date" column for default sorting
-  const eventStartDateColumn = displayColumns.find((col) =>
-    col.toLowerCase().includes('event start date') || col === 'Event Start Date');
+  const eventStartDateColumn = displayColumns.find((col) => col.toLowerCase().includes('event start date') || col === 'Event Start Date');
 
   // Apply default sorting if Event Start Date column exists
   let sortedData = data;
