@@ -1,0 +1,17 @@
+name: Publish Event Data Hourly
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *" # Every 5 minutes (for testing)
+
+jobs:
+  publish-event-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish event tracker Excel file
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: "https://main--aem-event-tracker--aemdemos.aem.page/aem-event-tracker-form1.json"
+          method: "POST"
+          timeout: 30000
+          customHeaders: '{"Authorization":"token ${{ secrets.ADMIN_API_KEY }}"}'
