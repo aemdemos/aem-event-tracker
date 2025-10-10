@@ -8,6 +8,14 @@ jobs:
   publish-event-data:
     runs-on: ubuntu-latest
     steps:
+      - name: Preview event tracker Excel file
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: "https://admin.hlx.page/preview/aemdemos/aem-event-tracker/main/aem-event-tracker-form1.json"
+          method: "POST"
+          timeout: 30000
+          customHeaders: '{"Authorization":"token ${{ secrets.ADMIN_API_KEY }}"}'
+
       - name: Publish event tracker Excel file
         uses: fjogeleit/http-request-action@v1
         with:
