@@ -11,7 +11,7 @@ jobs:
       - name: Publish event tracker Excel file
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "https://main--aem-event-tracker--aemdemos.aem.page/aem-event-tracker-form1.json"
+          url: "https://admin.hlx.page/live/aemdemos/aem-event-tracker/main/aem-event-tracker-form1"
           method: "POST"
           timeout: 30000
           customHeaders: '{"Authorization":"token ${{ secrets.ADMIN_API_KEY }}"}'
