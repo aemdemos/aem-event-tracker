@@ -92,6 +92,41 @@ function formatCellValue(value) {
 }
 
 /**
+ * Formats Excel serial date with time
+ * @param {string|number} dateValue - Excel serial date
+ * @param {string} timeValue - Time string (e.g., "03:00")
+ * @returns {string} Formatted date and time string
+ */
+function formatDateTimeValue(dateValue, timeValue) {
+  if (!dateValue) return '';
+
+  const formattedDate = isExcelSerialDate(dateValue) ? formatExcelDate(dateValue) : dateValue;
+
+  if (timeValue && timeValue.trim()) {
+    return `${formattedDate} ${timeValue}`;
+  }
+
+  return formattedDate;
+}
+
+/**
+ * Gets the corresponding time column name for a date column
+ * @param {string} dateColumn - Date column name
+ * @param {Array} allColumns - All available columns
+ * @returns {string|null} Time column name or null
+ */
+function getTimeColumnForDate(dateColumn, allColumns) {
+  // If column ends with "Date", look for corresponding "Time" column
+  if (dateColumn.endsWith('Date')) {
+    const timeColumn = dateColumn.replace(/Date$/, 'Time');
+    if (allColumns.includes(timeColumn)) {
+      return timeColumn;
+    }
+  }
+  return null;
+}
+
+/**
  * Creates a Date object from Excel serial date and time
  * @param {string|number} serialDate - Excel serial date
  * @param {string} timeString - Time string (e.g., "03:00")
@@ -306,9 +341,10 @@ function isToday(dateValue) {
  * Renders the table body with data
  * @param {HTMLElement} tbody - Table body element
  * @param {Array} data - Data to render
- * @param {Array} columns - Column names
+ * @param {Array} columns - Column names to display
+ * @param {Array} allColumns - All available column names from data
  */
-function renderTableBody(tbody, data, columns) {
+function renderTableBody(tbody, data, columns, allColumns = []) {
   tbody.innerHTML = '';
   data.forEach((row) => {
     const tr = document.createElement('tr');
@@ -323,8 +359,21 @@ function renderTableBody(tbody, data, columns) {
 
     columns.forEach((column) => {
       const td = document.createElement('td');
-      const rawValue = row[column] || '';
-      td.textContent = formatCellValue(rawValue);
+
+      // Check if this is a date column with a corresponding time column
+      const timeColumn = getTimeColumnForDate(column, allColumns);
+
+      if (timeColumn) {
+        // Combine date and time
+        const dateValue = row[column] || '';
+        const timeValue = row[timeColumn] || '';
+        td.textContent = formatDateTimeValue(dateValue, timeValue);
+      } else {
+        // Regular column
+        const rawValue = row[column] || '';
+        td.textContent = formatCellValue(rawValue);
+      }
+
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -380,7 +429,7 @@ function updatePaginationControls(container, state) {
         state.currentPage,
         state.itemsPerPage,
       );
-      renderTableBody(state.tbody, paginatedData, state.columns);
+      renderTableBody(state.tbody, paginatedData, state.columns, state.allColumns);
       updatePaginationControls(container, state);
     }
   });
@@ -405,7 +454,7 @@ function updatePaginationControls(container, state) {
         state.currentPage,
         state.itemsPerPage,
       );
-      renderTableBody(state.tbody, paginatedData, state.columns);
+      renderTableBody(state.tbody, paginatedData, state.columns, state.allColumns);
       updatePaginationControls(container, state);
     }
   });
@@ -451,7 +500,7 @@ function addSortHandlers(table, thead, tbody, data, columns, paginationState, co
         paginationState.currentPage,
         paginationState.itemsPerPage,
       );
-      renderTableBody(tbody, paginatedData, columns);
+      renderTableBody(tbody, paginatedData, columns, paginationState.allColumns);
 
       // Update pagination controls
       if (container) {
@@ -501,7 +550,7 @@ function createPaginationControls(container, state, data, columns, tbody) {
       state.currentPage,
       state.itemsPerPage,
     );
-    renderTableBody(tbody, paginatedData, columns);
+    renderTableBody(tbody, paginatedData, columns, state.allColumns);
     updatePaginationControls(container, state);
   });
 
@@ -543,10 +592,24 @@ function createTable(data, columns = null, container = null) {
     return table;
   }
 
+  // Get all available columns from data
+  const allColumns = Object.keys(data[0]);
+
   // Determine which columns to display
-  const displayColumns = columns && columns.length > 0
+  let displayColumns = columns && columns.length > 0
     ? columns
-    : Object.keys(data[0]);
+    : allColumns;
+
+  // Filter out Time columns that have corresponding Date columns
+  displayColumns = displayColumns.filter((column) => {
+    // If this is a Time column, check if there's a corresponding Date column
+    if (column.endsWith('Time')) {
+      const dateColumn = column.replace(/Time$/, 'Date');
+      // Hide Time column if Date column exists in display columns
+      return !displayColumns.includes(dateColumn);
+    }
+    return true;
+  });
 
   // Create table header
   const thead = document.createElement('thead');
@@ -565,6 +628,7 @@ function createTable(data, columns = null, container = null) {
   // Store original data on the table for sorting and pagination
   table.dataset.originalData = JSON.stringify(data);
   table.dataset.displayColumns = JSON.stringify(displayColumns);
+  table.dataset.allColumns = JSON.stringify(allColumns);
 
   // Initialize pagination state
   const paginationState = {
@@ -574,6 +638,7 @@ function createTable(data, columns = null, container = null) {
     currentData: data,
     sortColumn: null,
     sortDirection: 'asc',
+    allColumns,
   };
 
   // Render initial page
@@ -582,7 +647,7 @@ function createTable(data, columns = null, container = null) {
     paginationState.currentPage,
     paginationState.itemsPerPage,
   );
-  renderTableBody(tbody, paginatedData, displayColumns);
+  renderTableBody(tbody, paginatedData, displayColumns, allColumns);
   table.appendChild(tbody);
 
   // Add click handlers for sorting (with pagination support)
